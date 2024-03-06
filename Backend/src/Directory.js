@@ -11,11 +11,21 @@ async function getFilesAndFolders(directoryPath) {
             const itemPath = path.join(directoryPath, item);
             try {
                 const stats = await fs.promises.stat(itemPath);
-
-                result.push({
-                    name: item,
-                    isFolder: stats.isDirectory()
-                });
+                // console.log(stats)
+                //if it is a directory
+                if (stats.isDirectory()) {
+                    result.push({
+                        name: item,
+                        isFolder: stats.isDirectory(),
+                    });
+                } else {
+                    // const fileUrl = process.env.BASE_URL + '/' + item;
+                    result.push({
+                        name: item,
+                        isFolder: stats.isDirectory(),
+                        sizeInBytes: stats.size // in bytes
+                    });
+                }
             } catch (error) {
                 // Skip over items for which we don't have permission to read
                 console.error('Error reading item:', error);
@@ -30,8 +40,15 @@ async function getFilesAndFolders(directoryPath) {
 }
 
 async function GetDir(req, res) {
-    // Example usage:
+
     console.log(req.body);
+
+    if (!req.body.dir) {
+        return res.status(400).json({
+            success: false,
+            error: 'Directory path not provided'
+        })
+    }
 
     const directoryPath = req.body.dir; // Change this to the desired directory path
     getFilesAndFolders(directoryPath).then(filesAndFolders => {
@@ -50,4 +67,27 @@ async function GetDir(req, res) {
     });
 }
 
-module.exports = { GetDir };
+
+function downloadFile(req, res) {
+    console.log(req.body);
+    const filePath = req.body.path;
+
+    // Check if the file exists
+    fs.stat(filePath, (err, stats) => {
+        if (err || !stats.isFile()) {
+            // If the file doesn't exist or is not a regular file, respond with 404 Not Found
+            return res.status(404).send('File not found');
+        }
+
+        // Set appropriate headers for file download
+        res.setHeader('Content-Type', 'application/octet-stream');
+        res.setHeader('Content-Disposition', `attachment; filename="${path.basename(filePath)}"`);
+        res.setHeader('Content-Length', stats.size);
+
+        // Stream the file contents to the response
+        const fileStream = fs.createReadStream(filePath);
+        fileStream.pipe(res);
+    });
+}
+
+module.exports = { GetDir, downloadFile };

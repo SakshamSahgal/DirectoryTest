@@ -1,7 +1,9 @@
+import Dir from "./Dir";
+
 
 function App() {
   return (
-    <p>Hi</p>
+    <Dir />
   );
 }
 

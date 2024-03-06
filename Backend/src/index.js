@@ -1,10 +1,15 @@
 require("dotenv").config()
 const port = process.env.PORT || 8080
 const { app } = require("./app");
-const { GetDir } = require("./Directory");
+const { GetDir, downloadFile } = require("./Directory");
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`)
 })
 
-app.get("/", GetDir);
+app.post("/getDir", GetDir);
+app.post("/download", downloadFile);
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "build", "index.html"));
+});
