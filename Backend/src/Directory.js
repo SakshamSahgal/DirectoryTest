@@ -11,19 +11,22 @@ async function getFilesAndFolders(directoryPath) {
             const itemPath = path.join(directoryPath, item);
             try {
                 const stats = await fs.promises.stat(itemPath);
-                // console.log(stats)
+                const permissions = stats.mode.toString(8).slice(-3); // Extract last 3 digits representing permissions
+                console.log(stats)
                 //if it is a directory
                 if (stats.isDirectory()) {
                     result.push({
                         name: item,
                         isFolder: stats.isDirectory(),
+                        permissions: permissions,
                     });
                 } else {
                     // const fileUrl = process.env.BASE_URL + '/' + item;
                     result.push({
                         name: item,
                         isFolder: stats.isDirectory(),
-                        sizeInBytes: stats.size // in bytes
+                        sizeInBytes: stats.size, // in bytes
+                        permissions: permissions,
                     });
                 }
             } catch (error) {
