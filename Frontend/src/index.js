@@ -3,7 +3,11 @@ import App from './App';
 
 import axios from 'axios';
 
-axios.defaults.baseURL = process.env.REACT_APP_ServerHost;
+if(process.env.NODE_ENV === 'development') {
+    axios.defaults.baseURL = process.env.REACT_APP_ServerLocalHost;
+}else{
+    axios.defaults.baseURL = process.env.REACT_APP_ServerRemoteHost;
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

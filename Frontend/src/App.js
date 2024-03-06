@@ -1,4 +1,4 @@
-import Dir from "./Dir";
+import Dir from './Dir';
 
 
 function App() {
