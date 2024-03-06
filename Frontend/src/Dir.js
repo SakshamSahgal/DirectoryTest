@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFolder, faFile } from '@fortawesome/free-solid-svg-icons';
+import { faFolder, faFile, faDownload } from '@fortawesome/free-solid-svg-icons';
 import { Table } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
 
@@ -45,15 +45,29 @@ function Dir() {
     const handleBackButtonClick = () => {
         if (currentPath === "/") return;
         const path = currentPath.split("/");
-        console.log(path);
         path.pop();
-        console.log(path);
         let newPath = path.join("/");
         //add a / in the starting if not present
         if (!newPath.startsWith("/")) newPath = `/${newPath}`;
         console.log(newPath);
         fetchDir(newPath);
     };
+
+    const handleFileDownload = async (name) => {
+        console.log(name);
+        try {
+            const response = await axios.post("/download", { path: currentPath + "/" + name }, { withCredentials: true });
+            console.log(response);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', name);
+            document.body.appendChild(link);
+            link.click();
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     return (
         <div>
@@ -75,15 +89,17 @@ function Dir() {
                                 <col className="col-2" />
                                 <col className="col-2" />
                                 <col className="col-2" />
+                                <col className="col-2" />
                             </colgroup>
 
                             <thead className="thead-dark">
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Size</th>
-                                    <th>Owner</th>
-                                    <th>Group</th>
-                                    <th>Other</th>
+                                    <th className='text-center'>Name</th>
+                                    <th className='text-center'>Size</th>
+                                    <th className='text-center'>Owner</th>
+                                    <th className='text-center'>Group</th>
+                                    <th className='text-center'>Other</th>
+                                    <th className='text-center'>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -98,13 +114,16 @@ function Dir() {
                                         <td style={{ textAlign: 'center' }}>{convertPermission(item.permissions[0])}</td>
                                         <td style={{ textAlign: 'center' }}>{convertPermission(item.permissions[1])}</td>
                                         <td style={{ textAlign: 'center' }}>{convertPermission(item.permissions[2])}</td>
+                                        <td style={{ textAlign: 'center' }}>
+                                            {item.isFolder ? null : (
+                                                <FontAwesomeIcon icon={faDownload} onClick={() => handleFileDownload(item.name)} />
+                                            )}
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </Table>
-
                     </div>
-
                 </div>
             </div>
         </div>

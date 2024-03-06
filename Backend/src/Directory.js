@@ -71,7 +71,8 @@ async function GetDir(req, res) {
 }
 
 
-function downloadFile(req, res) {
+
+async function downloadFile(req, res) {
     console.log(req.body);
     const filePath = req.body.path;
 
@@ -92,5 +93,6 @@ function downloadFile(req, res) {
         fileStream.pipe(res);
     });
 }
+
 
 module.exports = { GetDir, downloadFile };
